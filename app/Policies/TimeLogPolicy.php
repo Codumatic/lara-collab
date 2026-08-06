@@ -21,6 +21,8 @@ class TimeLogPolicy
      */
     public function delete(User $user, TimeLog $timeLog, Project $project): bool
     {
-        return $user->hasPermissionTo('delete time log') && $user->hasProjectAccess($project);
+        return $timeLog->user_id === $user->id
+            && $user->hasPermissionTo('delete time log')
+            && $user->hasProjectAccess($project);
     }
 }

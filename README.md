@@ -193,9 +193,9 @@ Configure real-time notifications using [Pusher](https://pusher.com) or an [open
 - [x] Kanban board view
 - [x] Expense and profit reporting per user
 - [x] Project notes section
+- [x] Multi-user time logging per task
 
 ### Planned
-- [ ] Multi-user time logging per task
 - [ ] Task change history
 - [ ] Granular per-user permissions
 - [ ] Responsive design improvements
