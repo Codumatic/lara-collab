@@ -7,8 +7,7 @@ import useWebSockets from "@/hooks/useWebSockets";
 import Layout from "@/layouts/MainLayout";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { usePage } from "@inertiajs/react";
-import { Button, Grid } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { Grid } from "@mantine/core";
 import { useEffect } from "react";
 import { CreateTaskDrawer } from "./Drawers/CreateTaskDrawer";
 import { EditTaskDrawer } from "./Drawers/EditTaskDrawer";
@@ -16,7 +15,6 @@ import ArchivedItems from "./Index/Archive/ArchivedItems";
 import Filters from "./Index/Filters";
 import FiltersDrawer from "./Index/FiltersDrawer";
 import Header from "./Index/Header";
-import CreateTasksGroupModal from "./Index/Modals/CreateTasksGroupModal";
 import TaskGroup from "./Index/TaskGroup";
 import classes from "./css/Index.module.css";
 
@@ -26,7 +24,7 @@ const TasksIndex = () => {
   const { project, taskGroups, groupedTasks, openedTask } = usePage().props;
   currentProject = project;
 
-  const { groups, setGroups, reorderGroup } = useTaskGroupsStore();
+  const { groups, setGroups } = useTaskGroupsStore();
   const { tasks, setTasks, addTask, reorderTask, moveTask } = useTasksStore();
   const { hasFilters } = useTaskFiltersStore();
   const { initProjectWebSocket } = useWebSockets();
@@ -54,8 +52,6 @@ const TasksIndex = () => {
       } else {
         moveTask(source, destination);
       }
-    } else {
-      reorderGroup(source.index, destination.index);
     }
   };
 
@@ -94,20 +90,6 @@ const TasksIndex = () => {
                               />
                             ))}
                           {provided.placeholder}
-                          {!route().params.archived && can("create task group") && (
-                            <Button
-                              leftSection={<IconPlus size={14} />}
-                              variant="transparent"
-                              size="sm"
-                              mt={14}
-                              m={4}
-                              radius="xl"
-                              onClick={CreateTasksGroupModal}
-                              style={{ width: "200px" }}
-                            >
-                              Add {tasksView === "list" ? "tasks group" : "group"}
-                            </Button>
-                          )}
                         </div>
                       </div>
                     )}

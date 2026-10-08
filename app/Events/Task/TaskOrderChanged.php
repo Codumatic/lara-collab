@@ -18,7 +18,7 @@ class TaskOrderChanged implements ShouldBroadcast
      */
     public function __construct(
         private int $projectId,
-        public int $groupId,
+        public string $groupId,
         public int $fromIndex,
         public int $toIndex,
     ) {

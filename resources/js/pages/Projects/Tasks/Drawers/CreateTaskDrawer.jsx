@@ -15,20 +15,21 @@ import {
   Select,
   Text,
   TextInput,
+  Textarea,
   rem,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useEffect } from 'react';
 import LabelsDropdown from './LabelsDropdown';
 import PriorityDropdown from './PriorityDropdown';
+import SeverityDropdown from './SeverityDropdown';
 import classes from './css/TaskDrawer.module.css';
-import { PricingType } from '@/utils/enums';
+import { PricingType, TaskStatus, taskStatusOptions } from '@/utils/enums';
 
 export function CreateTaskDrawer() {
   const { create, closeCreateTask } = useTaskDrawerStore();
   const {
     usersWithAccessToProject,
-    taskGroups,
     labels,
     project,
     currency,
@@ -36,10 +37,15 @@ export function CreateTaskDrawer() {
   } = usePage().props;
 
   const initial = {
-    group_id: create.group_id ? create.group_id.toString() : '',
+    status: create.status || TaskStatus.NEW,
     assigned_to_user_id: '',
     name: '',
     description: '',
+    steps_to_reproduce: '',
+    expected_result: '',
+    actual_result: '',
+    severity: null,
+    case_link: '',
     pricing_type: project?.default_pricing_type || PricingType.HOURLY,
     estimation: '',
     priority_id: null,
@@ -143,6 +149,51 @@ export function CreateTaskDrawer() {
             onChange={content => updateValue('description', content)}
           />
 
+          <Text
+            size='sm'
+            fw={500}
+            mt='xl'
+            mb={4}
+          >
+            Steps to reproduce
+          </Text>
+          <RichTextEditor
+            placeholder='Steps to reproduce the issue'
+            height={160}
+            onChange={content => updateValue('steps_to_reproduce', content)}
+          />
+          {form.errors.steps_to_reproduce && (
+            <Text
+              size='xs'
+              c='red'
+              mt={4}
+            >
+              {form.errors.steps_to_reproduce}
+            </Text>
+          )}
+
+          <Textarea
+            label='Expected result'
+            placeholder='What should happen'
+            mt='md'
+            autosize
+            minRows={2}
+            value={form.data.expected_result}
+            onChange={e => updateValue('expected_result', e.target.value)}
+            error={form.errors.expected_result}
+          />
+
+          <Textarea
+            label='Actual result'
+            placeholder='What actually happens'
+            mt='md'
+            autosize
+            minRows={2}
+            value={form.data.actual_result}
+            onChange={e => updateValue('actual_result', e.target.value)}
+            error={form.errors.actual_result}
+          />
+
           <Dropzone
             mt='xl'
             selected={form.data.attachments}
@@ -188,16 +239,14 @@ export function CreateTaskDrawer() {
         </div>
         <div className={classes.sidebar}>
           <Select
-            label='Task group'
-            placeholder='Select task group'
+            label='Status'
+            placeholder='Select status'
             required
-            value={form.data.group_id}
-            onChange={value => updateValue('group_id', value)}
-            data={taskGroups.map(i => ({
-              value: i.id.toString(),
-              label: i.name,
-            }))}
-            error={form.errors.group_id}
+            allowDeselect={false}
+            value={form.data.status}
+            onChange={value => updateValue('status', value)}
+            data={taskStatusOptions}
+            error={form.errors.status}
           />
 
           <Select
@@ -249,6 +298,22 @@ export function CreateTaskDrawer() {
             value={form.data.priority_id}
             onChange={value => updateValue('priority_id', value || null)}
             mt='md'
+          />
+
+          <SeverityDropdown
+            mt='md'
+            value={form.data.severity}
+            onChange={value => updateValue('severity', value)}
+            error={form.errors.severity}
+          />
+
+          <TextInput
+            label='Link to case'
+            placeholder='https://...'
+            mt='md'
+            value={form.data.case_link}
+            onChange={e => updateValue('case_link', e.target.value)}
+            error={form.errors.case_link}
           />
 
 

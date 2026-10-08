@@ -1,40 +1,29 @@
 import useTaskDrawerStore from "@/hooks/store/useTaskDrawerStore";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { ActionIcon, Flex, Group, Text, Tooltip, rem } from "@mantine/core";
-import { IconGripVertical, IconPlus } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 import Task from "./Task";
-import TaskGroupActions from "./TaskGroupActions";
 import classes from "./css/TaskGroup.module.css";
 
 export default function TaskGroup({ group, tasks, ...props }) {
   const { openCreateTask } = useTaskDrawerStore();
 
   return (
-    <Draggable draggableId={group.id.toString()} {...props}>
+    <Draggable draggableId={group.id.toString()} isDragDisabled {...props}>
       {(provided, snapshot) => (
         <div
           className={`${classes.row} ${snapshot.isDragging && classes.itemDragging}`}
           ref={provided.innerRef}
           {...provided.draggableProps}
         >
-          <div className={classes.group}
-           style={group.color ? { backgroundColor: group.color } : undefined}>
+          <div className={classes.group}>
             <Group>
-              <div {...provided.dragHandleProps} className={classes.dragHandle}>
-                <IconGripVertical
-                  style={{
-                    width: rem(18),
-                    height: rem(18),
-                    display:
-                      can("reorder task group") && !route().params.archived ? "inline" : "none",
-                  }}
-                  stroke={1.5}
-                />
-              </div>
               <Text size="xl" fw={700}>
                 {group.name}
               </Text>
-              <TaskGroupActions group={group} className={classes.actions} />
+              <Text size="sm" c="dimmed">
+                {tasks.length}
+              </Text>
             </Group>
             {!route().params.archived && can("create task") && (
               <Tooltip label="Add task" openDelay={1000} withArrow>

@@ -16,7 +16,7 @@ class TaskRestored implements ShouldBroadcast
 
     public Task $task;
 
-    public int $groupId;
+    public string $groupId;
 
     /**
      * Create a new event instance.
@@ -24,7 +24,7 @@ class TaskRestored implements ShouldBroadcast
     public function __construct(Task $task)
     {
         $this->task = $task->loadDefault();
-        $this->groupId = $task->group_id;
+        $this->groupId = $task->status->value;
 
         $this->dontBroadcastToCurrentUser();
     }

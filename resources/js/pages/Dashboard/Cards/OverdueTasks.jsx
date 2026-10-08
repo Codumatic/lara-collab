@@ -1,6 +1,7 @@
 import Card from "@/components/Card";
 import EmptyWithIcon from "@/components/EmptyWithIcon";
 import TaskGroupLabel from "@/components/TaskGroupLabel";
+import { taskStatusLabel } from "@/utils/enums";
 import { date, diffForHumans } from "@/utils/datetime";
 import { redirectTo } from "@/utils/route";
 import {
@@ -42,8 +43,8 @@ export default function OverdueTasks({ tasks }) {
                       {task.name}
                     </Text>
                     <Group>
-                      <Tooltip label="Task group" openDelay={500} withArrow>
-                        <TaskGroupLabel>{task.task_group.name}</TaskGroupLabel>
+                      <Tooltip label="Status" openDelay={500} withArrow>
+                        <TaskGroupLabel>{taskStatusLabel(task.status)}</TaskGroupLabel>
                       </Tooltip>
                       <Text fz={11} c="dimmed">
                         {task.project.name}

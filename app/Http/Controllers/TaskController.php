@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Task\CreateTask;
 use App\Actions\Task\UpdateTask;
+use App\Enums\TaskStatus;
 use App\Events\Task\TaskDeleted;
 use App\Events\Task\TaskGroupChanged;
 use App\Events\Task\TaskOrderChanged;
@@ -16,12 +17,12 @@ use App\Models\Label;
 use App\Models\OwnerCompany;
 use App\Models\Project;
 use App\Models\Task;
-use App\Models\TaskGroup;
 use App\Models\TaskPriority;
 use App\Services\PermissionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -31,21 +32,15 @@ class TaskController extends Controller
     {
         $this->authorize('viewAny', [Task::class, $project]);
 
-        $groups = $project
-            ->taskGroups()
-            ->when($request->has('archived'), fn ($query) => $query->onlyArchived())
-            ->get();
+        $groups = $request->has('archived') ? [] : TaskStatus::columns();
 
-        $groupedTasks = $project
-            ->taskGroups()
-            ->with(['project' => fn ($query) => $query->withArchived()])
-            ->get()
-            ->mapWithKeys(function (TaskGroup $group) use ($request, $project) {
+        $groupedTasks = collect(TaskStatus::cases())
+            ->mapWithKeys(function (TaskStatus $status) use ($request, $project) {
                 $prioritySort = data_get($request->input('sort', []), 'priority');
 
                 return [
-                    $group->id => Task::where('project_id', $project->id)
-                        ->where('group_id', $group->id)
+                    $status->value => Task::where('project_id', $project->id)
+                        ->where('status', $status)
                         ->searchByQueryString()
                         ->filterByQueryString()
                         ->when($request->user()->hasRole('client'), fn ($query) => $query->where('hidden_from_clients', false))
@@ -109,7 +104,7 @@ class TaskController extends Controller
 
         TaskOrderChanged::dispatch(
             $project->id,
-            $request->group_id,
+            $request->status,
             $request->from_index,
             $request->to_index,
         );
@@ -121,13 +116,20 @@ class TaskController extends Controller
     {
         $this->authorize('reorder', [Task::class, $project]);
 
+        $request->validate([
+            'from_status' => ['required', Rule::enum(TaskStatus::class)],
+            'to_status' => ['required', Rule::enum(TaskStatus::class)],
+        ]);
+
         Task::setNewOrder($request->ids);
-        Task::whereIn('id', $request->ids)->update(['group_id' => $request->to_group_id]);
+        Task::where('project_id', $project->id)
+            ->whereIn('id', $request->ids)
+            ->update(['status' => $request->to_status]);
 
         TaskGroupChanged::dispatch(
             $project->id,
-            $request->from_group_id,
-            $request->to_group_id,
+            $request->from_status,
+            $request->to_status,
             $request->from_index,
             $request->to_index,
         );

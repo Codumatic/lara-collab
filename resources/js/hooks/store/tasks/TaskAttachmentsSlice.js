@@ -4,7 +4,7 @@ import { produce } from "immer";
 
 const createTaskAttachmentsSlice = (set, get) => ({
   uploadAttachments: async (task, files) => {
-    const index = get().tasks[task.group_id].findIndex((i) => i.id === task.id);
+    const index = get().tasks[task.status].findIndex((i) => i.id === task.id);
 
     try {
       const { data } = await axios.postForm(
@@ -14,8 +14,8 @@ const createTaskAttachmentsSlice = (set, get) => ({
       );
 
       return set(produce(state => {
-        state.tasks[task.group_id][index].attachments = [
-          ...state.tasks[task.group_id][index].attachments,
+        state.tasks[task.status][index].attachments = [
+          ...state.tasks[task.status][index].attachments,
           ...data.files,
         ];
       }));
@@ -25,15 +25,15 @@ const createTaskAttachmentsSlice = (set, get) => ({
     }
   },
   deleteAttachment: async (task, index) => {
-    const taskIndex = get().tasks[task.group_id].findIndex((i) => i.id === task.id);
+    const taskIndex = get().tasks[task.status].findIndex((i) => i.id === task.id);
 
     try {
-      const deleteId = get().tasks[task.group_id][taskIndex].attachments[index].id;
+      const deleteId = get().tasks[task.status][taskIndex].attachments[index].id;
       await axios.delete(route("projects.tasks.attachments.destroy", [task.project_id, task.id, deleteId]), { progress: true });
 
       return set(produce(state => {
-        state.tasks[task.group_id][taskIndex].attachments = [
-          ...state.tasks[task.group_id][taskIndex].attachments.filter(i => i.id !== deleteId)
+        state.tasks[task.status][taskIndex].attachments = [
+          ...state.tasks[task.status][taskIndex].attachments.filter(i => i.id !== deleteId)
         ];
       }));
     } catch (e) {

@@ -26,7 +26,7 @@ class UpdateTask
         if (! in_array($updateField, ['subscribed_users', 'labels'])) {
             $task->update($data);
 
-            if ($updateField === 'group_id') {
+            if ($updateField === 'status') {
                 $task->update(['order_column' => 0]);
             }
         }

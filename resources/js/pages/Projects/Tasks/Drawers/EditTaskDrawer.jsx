@@ -7,6 +7,7 @@ import { date } from '@/utils/datetime';
 import { hasRoles } from '@/utils/user';
 import { usePage } from '@inertiajs/react';
 import {
+  Anchor,
   Breadcrumbs,
   Checkbox,
   Drawer,
@@ -16,27 +17,30 @@ import {
   Select,
   Text,
   TextInput,
+  Textarea,
   rem,
 } from '@mantine/core';
+import { IconExternalLink } from '@tabler/icons-react';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import Comments from './Comments';
 import LabelsDropdown from './LabelsDropdown';
 import PriorityDropdown from './PriorityDropdown';
+import SeverityDropdown from './SeverityDropdown';
 import Timer from './Timer';
 import classes from './css/TaskDrawer.module.css';
-import { PricingType } from '@/utils/enums';
+import { PricingType, TaskStatus, taskStatusOptions } from '@/utils/enums';
 
 export function EditTaskDrawer() {
   const editorRef = useRef(null);
+  const stepsEditorRef = useRef(null);
   const { edit, openEditTask, closeEditTask } = useTaskDrawerStore();
   const { initTaskWebSocket } = useWebSockets();
   const { findTask, updateTaskProperty, complete, deleteAttachment, uploadAttachments } =
     useTasksStore();
   const {
     usersWithAccessToProject,
-    taskGroups,
     labels,
     priorities,
     openedTask,
@@ -51,10 +55,15 @@ export function EditTaskDrawer() {
   const task = findTask(edit.task.id);
 
   const [data, setData] = useState({
-    group_id: '',
+    status: TaskStatus.NEW,
     assigned_to_user_id: '',
     name: '',
     description: '',
+    steps_to_reproduce: '',
+    expected_result: '',
+    actual_result: '',
+    severity: null,
+    case_link: '',
     pricing_type: PricingType.HOURLY,
     estimation: 0,
     priority_id: '',
@@ -75,10 +84,15 @@ export function EditTaskDrawer() {
   useEffect(() => {
     if (edit.opened) {
       setData({
-        group_id: task?.group_id || '',
+        status: task?.status || TaskStatus.NEW,
         assigned_to_user_id: task?.assigned_to_user_id || '',
         name: task?.name || '',
         description: task?.description || '',
+        steps_to_reproduce: task?.steps_to_reproduce || '',
+        expected_result: task?.expected_result || '',
+        actual_result: task?.actual_result || '',
+        severity: task?.severity || null,
+        case_link: task?.case_link || '',
         pricing_type: task?.pricing_type || PricingType.HOURLY,
         estimation: task?.estimation || 0,
         priority_id: task?.priority_id || '',
@@ -92,6 +106,7 @@ export function EditTaskDrawer() {
       });
       setTimeout(() => {
         editorRef.current?.setContent(task?.description || '');
+        stepsEditorRef.current?.setContent(task?.steps_to_reproduce || '');
       }, 300);
     }
   }, [edit.opened, task]);
@@ -100,7 +115,15 @@ export function EditTaskDrawer() {
     setData({ ...data, [field]: value });
 
     const dropdowns = ['labels', 'subscribed_users'];
-    const onBlurInputs = ['name', 'description', 'fixed_price'];
+    const onBlurInputs = [
+      'name',
+      'description',
+      'steps_to_reproduce',
+      'expected_result',
+      'actual_result',
+      'case_link',
+      'fixed_price',
+    ];
 
     if (dropdowns.includes(field)) {
       const options = {
@@ -212,6 +235,48 @@ export function EditTaskDrawer() {
                 readOnly={!can('edit task')}
               />
 
+              <Text
+                size='sm'
+                fw={500}
+                mt='xl'
+                mb={4}
+              >
+                Steps to reproduce
+              </Text>
+              <RichTextEditor
+                ref={stepsEditorRef}
+                placeholder='Steps to reproduce the issue'
+                content={data.steps_to_reproduce}
+                height={160}
+                onChange={content => updateValue('steps_to_reproduce', content)}
+                onBlur={() => onBlurUpdate('steps_to_reproduce')}
+                readOnly={!can('edit task')}
+              />
+
+              <Textarea
+                label='Expected result'
+                placeholder='What should happen'
+                mt='md'
+                autosize
+                minRows={2}
+                value={data.expected_result}
+                onChange={e => updateValue('expected_result', e.target.value)}
+                onBlur={() => onBlurUpdate('expected_result')}
+                readOnly={!can('edit task')}
+              />
+
+              <Textarea
+                label='Actual result'
+                placeholder='What actually happens'
+                mt='md'
+                autosize
+                minRows={2}
+                value={data.actual_result}
+                onChange={e => updateValue('actual_result', e.target.value)}
+                onBlur={() => onBlurUpdate('actual_result')}
+                readOnly={!can('edit task')}
+              />
+
               {can('edit task') && (
                 <Dropzone
                   mt='xl'
@@ -225,15 +290,12 @@ export function EditTaskDrawer() {
             </div>
             <div className={classes.sidebar}>
               <Select
-                label='Task group'
-                placeholder='Select task group'
+                label='Status'
+                placeholder='Select status'
                 allowDeselect={false}
-                value={data.group_id.toString()}
-                onChange={value => updateValue('group_id', value)}
-                data={taskGroups.map(i => ({
-                  value: i.id.toString(),
-                  label: i.name,
-                }))}
+                value={data.status}
+                onChange={value => updateValue('status', value)}
+                data={taskStatusOptions}
                 readOnly={!can('edit task')}
               />
 
@@ -290,6 +352,35 @@ export function EditTaskDrawer() {
                   updateValue('priority_id', value || null);
                 }}
                 mt='md'
+              />
+
+              <SeverityDropdown
+                mt='md'
+                value={data.severity}
+                onChange={value => updateValue('severity', value)}
+                readOnly={!can('edit task')}
+              />
+
+              <TextInput
+                label='Link to case'
+                placeholder='https://...'
+                mt='md'
+                value={data.case_link}
+                onChange={e => updateValue('case_link', e.target.value)}
+                onBlur={() => onBlurUpdate('case_link')}
+                readOnly={!can('edit task')}
+                rightSection={
+                  data.case_link && /^https?:\/\//i.test(data.case_link) ? (
+                    <Anchor
+                      href={data.case_link}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      display='flex'
+                    >
+                      <IconExternalLink size={16} />
+                    </Anchor>
+                  ) : null
+                }
               />
 
               <Select

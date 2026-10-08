@@ -3,6 +3,7 @@
 namespace App\Actions\Task;
 
 use App\Enums\PricingType;
+use App\Enums\TaskStatus;
 use App\Events\Task\AttachmentsUploaded;
 use App\Events\Task\TaskCreated;
 use App\Models\Project;
@@ -27,12 +28,18 @@ class CreateTask
             }
 
             $task = $project->tasks()->create([
-                'group_id' => $data['group_id'],
+                'group_id' => $data['group_id'] ?? null,
+                'status' => $data['status'] ?? TaskStatus::NEW,
                 'created_by_user_id' => auth()->id(),
                 'assigned_to_user_id' => $data['assigned_to_user_id'],
                 'name' => $data['name'],
                 'number' => $project->tasks()->withArchived()->count() + 1,
                 'description' => $data['description'],
+                'steps_to_reproduce' => $data['steps_to_reproduce'] ?? null,
+                'expected_result' => $data['expected_result'] ?? null,
+                'actual_result' => $data['actual_result'] ?? null,
+                'severity' => $data['severity'] ?? null,
+                'case_link' => $data['case_link'] ?? null,
                 'due_on' => $data['due_on'],
                 'estimation' => $data['estimation'],
                 'priority_id' => $data['priority_id'] ?? null,

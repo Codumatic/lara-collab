@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\PricingType;
+use App\Enums\Severity;
+use App\Enums\TaskStatus;
 use App\Models\Filters\IsNullFilter;
 use App\Models\Filters\TaskCompletedFilter;
 use App\Models\Filters\TaskOverdueFilter;
@@ -30,12 +32,18 @@ class Task extends Model implements AuditableContract, Sortable
     protected $fillable = [
         'project_id',
         'group_id',
+        'status',
         'created_by_user_id',
         'assigned_to_user_id',
         'invoice_id',
         'name',
         'number',
         'description',
+        'steps_to_reproduce',
+        'expected_result',
+        'actual_result',
+        'severity',
+        'case_link',
         'due_on',
         'estimation',
         'priority_id',
@@ -62,6 +70,8 @@ class Task extends Model implements AuditableContract, Sortable
         'priority' => 'integer',
         'fixed_price' => 'integer',
         'pricing_type' => PricingType::class,
+        'severity' => Severity::class,
+        'status' => TaskStatus::class,
     ];
 
     protected $appends = [
@@ -87,7 +97,7 @@ class Task extends Model implements AuditableContract, Sortable
     public function filters(): array
     {
         return [
-            (new WhereInFilter('group_id'))->setQueryName('groups'),
+            (new WhereInFilter('status'))->setQueryName('statuses'),
             (new WhereInFilter('assigned_to_user_id'))->setQueryName('assignees'),
             (new TaskOverdueFilter('due_on'))->setQueryName('overdue'),
             (new IsNullFilter('due_on'))->setQueryName('not_set'),

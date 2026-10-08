@@ -18,8 +18,8 @@ class TaskGroupChanged implements ShouldBroadcast
      */
     public function __construct(
         private int $projectId,
-        public int $fromGroupId,
-        public int $toGroupId,
+        public string $fromGroupId,
+        public string $toGroupId,
         public int $fromIndex,
         public int $toIndex,
     ) {

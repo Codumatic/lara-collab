@@ -17,10 +17,10 @@ const useTasksStore = create((set, get) => ({
   setTasks: (tasks) => set(() => ({ tasks: { ...tasks } })),
   addTask: (task) => {
     return set(produce(state => {
-      const index = state.tasks[task.group_id].findIndex((i) => i.id === task.id);
+      const index = state.tasks[task.status].findIndex((i) => i.id === task.id);
 
       if (index === -1) {
-        state.tasks[task.group_id] = [...state.tasks[task.group_id], task];
+        state.tasks[task.status] = [...state.tasks[task.status], task];
       }
     }));
   },
@@ -44,21 +44,21 @@ const useTasksStore = create((set, get) => ({
         );
 
       return set(produce(state => {
-        const index = state.tasks[task.group_id].findIndex((i) => i.id === task.id);
+        const index = state.tasks[task.status].findIndex((i) => i.id === task.id);
 
-        if (property === 'group_id' && task.group_id !== value) {
-          const result = move(state.tasks, task.group_id, value, index, 0);
+        if (property === 'status' && task.status !== value) {
+          const result = move(state.tasks, task.status, value, index, 0);
 
-          state.tasks[task.group_id] = result[task.group_id];
+          state.tasks[task.status] = result[task.status];
           state.tasks[value] = result[value];
 
           state.tasks[value][0][property] = value;
         } else {
-          state.tasks[task.group_id][index][property] = value;
+          state.tasks[task.status][index][property] = value;
           // For properties with related objects (e.g., priority_id has priority object)
           if (options) {
             const relatedProperty = property.replace('_id', '');
-            state.tasks[task.group_id][index][relatedProperty] = options;
+            state.tasks[task.status][index][relatedProperty] = options;
           }
         }
       }));
@@ -70,24 +70,24 @@ const useTasksStore = create((set, get) => ({
 
   complete: (task, checked) => {
     const newState = checked ? true : null;
-    const index = get().tasks[task.group_id].findIndex((i) => i.id === task.id);
+    const index = get().tasks[task.status].findIndex((i) => i.id === task.id);
 
     axios
       .post(route("projects.tasks.complete", [task.project_id, task.id]), { completed: checked })
       .catch(() => alert("Failed to save task completed action"));
 
     return set(produce(state => {
-      state.tasks[task.group_id][index].completed_at = newState
+      state.tasks[task.status][index].completed_at = newState
     }));
   },
   reorderTask: (source, destination) => {
-    const sourceGroupId = +source.droppableId.split("-")[1];
+    const sourceGroupId = source.droppableId.split("-")[1];
 
     const result = reorder(get().tasks[sourceGroupId], source.index, destination.index);
 
     const data = {
       ids: result.map((i) => i.id),
-      group_id: sourceGroupId,
+      status: sourceGroupId,
       from_index: source.index,
       to_index: destination.index,
     };
@@ -99,15 +99,15 @@ const useTasksStore = create((set, get) => ({
     return set(produce(state => { state.tasks[sourceGroupId] = result }));
   },
   moveTask: (source, destination) => {
-    const sourceGroupId = +source.droppableId.split("-")[1];
-    const destinationGroupId = +destination.droppableId.split("-")[1];
+    const sourceGroupId = source.droppableId.split("-")[1];
+    const destinationGroupId = destination.droppableId.split("-")[1];
 
     const result = move(get().tasks, sourceGroupId, destinationGroupId, source.index, destination.index);
 
     const data = {
       ids: result[destinationGroupId].map((i) => i.id),
-      from_group_id: sourceGroupId,
-      to_group_id: destinationGroupId,
+      from_status: sourceGroupId,
+      to_status: destinationGroupId,
       from_index: source.index,
       to_index: destination.index,
     };

@@ -9,7 +9,7 @@ const params = currentUrlParams();
 const useTaskFiltersStore = create((set, get) => ({
   openedDrawer: false,
   filters: {
-    groups: params.groups || [],
+    statuses: params.statuses || [],
     assignees: params.assignees || [],
     due_date: {
       not_set: params.not_set || 0,
@@ -42,7 +42,7 @@ const useTaskFiltersStore = create((set, get) => ({
 
     return set(() => ({
       filters: {
-        groups: [],
+        statuses: [],
         assignees: [],
         due_date: {
           not_set: 0,

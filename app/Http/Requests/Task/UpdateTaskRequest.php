@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Task;
 
 use App\Enums\PricingType;
+use App\Enums\Severity;
+use App\Enums\TaskStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,9 +28,15 @@ class UpdateTaskRequest extends FormRequest
     {
         return [
             'name' => ['string:255'],
-            'group_id' => ['exists:task_groups,id'],
+            'group_id' => ['nullable', 'exists:task_groups,id'],
+            'status' => [Rule::enum(TaskStatus::class)],
             'assigned_to_user_id' => ['nullable', 'exists:users,id'],
             'description' => ['nullable'],
+            'steps_to_reproduce' => ['nullable', 'string'],
+            'expected_result' => ['nullable', 'string'],
+            'actual_result' => ['nullable', 'string'],
+            'severity' => ['nullable', Rule::enum(Severity::class)],
+            'case_link' => ['nullable', 'url', 'max:2048'],
             'estimation' => ['nullable'],
             'priority_id' => ['nullable', 'exists:task_priorities,id'],
             'pricing_type' => ['string', Rule::enum(PricingType::class)],

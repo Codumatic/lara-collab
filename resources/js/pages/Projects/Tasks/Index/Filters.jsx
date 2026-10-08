@@ -1,5 +1,5 @@
-import useTaskGroupsStore from "@/hooks/store/useTaskGroupsStore";
 import useTaskFiltersStore from "@/hooks/store/useTaskFiltersStore";
+import { taskStatusOptions } from "@/utils/enums";
 import { usePage } from "@inertiajs/react";
 import { Button, ColorSwatch, Stack, Text } from "@mantine/core";
 import FilterButton from "./Filters/FilterButton";
@@ -8,7 +8,6 @@ import classes from "./Filters/css/FilterButton.module.css";
 export default function Filters() {
   const { usersWithAccessToProject, labels } = usePage().props;
 
-  const { groups } = useTaskGroupsStore();
   const { filters, toggleArrayFilter, toggleObjectFilter, toggleValueFilter, prioritySort, sortHighToLow, sortLowToHigh, clearPrioritySort } =
     useTaskFiltersStore();
 
@@ -111,36 +110,34 @@ export default function Filters() {
 
         <div>
           <Text fz="xs" fw={700} tt="uppercase" mb="sm">
-            Status
+            Completion
           </Text>
           <Stack justify="flex-start" gap={6}>
             <FilterButton
               selected={filters.status === "completed"}
               onClick={() => toggleValueFilter("status", "completed")}
             >
-              Completed
+              Show completed tasks
             </FilterButton>
           </Stack>
         </div>
 
-        {groups.length > 0 && (
-          <div>
-            <Text fz="xs" fw={700} tt="uppercase" mb="sm">
-              Task groups
-            </Text>
-            <Stack justify="flex-start" gap={6}>
-              {groups.map((item) => (
-                <FilterButton
-                  key={item.id}
-                  selected={filters.groups.includes(item.id)}
-                  onClick={() => toggleArrayFilter("groups", item.id)}
-                >
-                  {item.name}
-                </FilterButton>
-              ))}
-            </Stack>
-          </div>
-        )}
+        <div>
+          <Text fz="xs" fw={700} tt="uppercase" mb="sm">
+            Status
+          </Text>
+          <Stack justify="flex-start" gap={6}>
+            {taskStatusOptions.map((item) => (
+              <FilterButton
+                key={item.value}
+                selected={filters.statuses.includes(item.value)}
+                onClick={() => toggleArrayFilter("statuses", item.value)}
+              >
+                {item.label}
+              </FilterButton>
+            ))}
+          </Stack>
+        </div>
       </Stack>
     </>
   );

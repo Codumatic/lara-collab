@@ -13,7 +13,7 @@ export const move = (tasks, sourceGroupId, destinationGroupId, sourceIndex, dest
   const destClone = Array.from(tasks[destinationGroupId] || []);
   const [removed] = sourceClone.splice(sourceIndex, 1);
 
-  removed.group_id = destinationGroupId;
+  removed.status = destinationGroupId;
 
   destClone.splice(destinationIndex, 0, removed);
 
