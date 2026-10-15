@@ -4,6 +4,8 @@ namespace App\Enums;
 
 enum IssueStatus: string
 {
+    use HasLabelOptions;
+
     case NEW = 'new';
     case IN_PROGRESS = 'in_progress';
     case RESOLVED = 'resolved';

@@ -11,7 +11,13 @@ import {
   useCombobox,
 } from "@mantine/core";
 
-export default function LabelsDropdown({ items, selected, onChange, ...props }) {
+export default function LabelsDropdown({
+  items,
+  selected,
+  onChange,
+  disabled = !can("edit task"),
+  ...props
+}) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
     onDropdownOpen: () => combobox.updateSelectedOptionIndex("active"),
@@ -29,7 +35,7 @@ export default function LabelsDropdown({ items, selected, onChange, ...props }) 
         store={combobox}
         onOptionSubmit={handleValueSelect}
         withinPortal={false}
-        disabled={!can("edit task")}
+        disabled={disabled}
       >
         <Combobox.DropdownTarget>
           <PillsInput pointer onClick={() => combobox.toggleDropdown()}>

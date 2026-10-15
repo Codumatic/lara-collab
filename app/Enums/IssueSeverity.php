@@ -4,6 +4,8 @@ namespace App\Enums;
 
 enum IssueSeverity: string
 {
+    use HasLabelOptions;
+
     case CRITICAL = 'critical';
     case MAJOR = 'major';
     case MEDIUM = 'medium';

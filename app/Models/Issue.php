@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\IssuePriority;
 use App\Enums\IssueSeverity;
 use App\Enums\IssueStatus;
+use App\Services\PermissionService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,6 +56,31 @@ class Issue extends Model implements AuditableContract
                 ->where('project_id', $issue->project_id)
                 ->max('number') + 1;
         });
+    }
+
+    /**
+     * Status, severity and priority options for the frontend dropdowns and badges.
+     *
+     * @return array{statuses: array<int, array{value: string, label: string}>, severities: array<int, array{value: string, label: string}>, priorities: array<int, array{value: string, label: string}>}
+     */
+    public static function dropdownOptions(): array
+    {
+        return [
+            'statuses' => IssueStatus::options(),
+            'severities' => IssueSeverity::options(),
+            'priorities' => IssuePriority::options(),
+        ];
+    }
+
+    /**
+     * Limit the query to issues in projects the user has access to.
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return $query->whereIn(
+            'project_id',
+            PermissionService::projectsThatUserCanAccess($user)->pluck('id')
+        );
     }
 
     public function project(): BelongsTo

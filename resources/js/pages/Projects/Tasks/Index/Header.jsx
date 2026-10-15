@@ -8,6 +8,7 @@ import { redirectTo, reloadWithQuery } from "@/utils/route";
 import { usePage } from "@inertiajs/react";
 import { ActionIcon, Button, Grid, Group, Text, Title, Tooltip } from "@mantine/core";
 import {
+  IconBug,
   IconFilter,
   IconFilterCog,
   IconLayoutKanban,
@@ -62,6 +63,18 @@ export default function Header() {
                 onClick={() => redirectTo("projects.notes", project.id)}
               >
                 <IconNote style={{ width: "60%", height: "60%" }} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+
+          {can("view issues") && (
+            <Tooltip label="Issues" openDelay={500} withArrow>
+              <ActionIcon
+                variant="default"
+                size="lg"
+                onClick={() => redirectTo("projects.issues", project.id)}
+              >
+                <IconBug style={{ width: "60%", height: "60%" }} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
           )}

@@ -1,7 +1,7 @@
 import Card from "@/components/Card";
 import { redirectTo } from "@/utils/route";
 import { Group, RingProgress, Stack, Text, Title, Tooltip, rem } from "@mantine/core";
-import { IconStarFilled } from "@tabler/icons-react";
+import { IconAlertTriangle, IconStarFilled } from "@tabler/icons-react";
 import round from "lodash/round";
 import classes from "./css/ProjectCard.module.css";
 
@@ -47,6 +47,29 @@ export function ProjectCard({ project }) {
               </Text>
             </Tooltip>
           </div>
+          {project.open_issues_count !== undefined && (
+            <Group gap={8}>
+              <Text
+                fz="sm"
+                className={classes.link}
+                onClick={() => redirectTo("projects.issues", project.id)}
+              >
+                Issues: {project.open_issues_count} open
+              </Text>
+              {project.critical_open_issues_count > 0 && (
+                <Tooltip label="Open critical issues" openDelay={500} withArrow>
+                  <Group gap={3}>
+                    <IconAlertTriangle
+                      style={{ width: rem(14), height: rem(14), color: "var(--mantine-color-red-6)" }}
+                    />
+                    <Text fz="sm" fw={600}>
+                      {project.critical_open_issues_count} critical
+                    </Text>
+                  </Group>
+                </Tooltip>
+              )}
+            </Group>
+          )}
         </Stack>
         <RingProgress
           size={100}

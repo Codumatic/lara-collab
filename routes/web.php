@@ -8,7 +8,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DropdownValuesController;
 use App\Http\Controllers\Invoice\InvoiceTasksController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\Issue\AllIssuesController;
+use App\Http\Controllers\Issue\IssueController;
 use App\Http\Controllers\MyWork\ActivityController;
+use App\Http\Controllers\MyWork\MyWorkIssueController;
 use App\Http\Controllers\MyWork\MyWorkTaskController;
 use App\Http\Controllers\Note\NoteController;
 use App\Http\Controllers\ProjectController;
@@ -68,6 +71,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('{project}/notes/{note}/unlock', [NoteController::class, 'unlock'])->name('notes.unlock')->middleware(['throttle:10,1'])->scopeBindings();
         Route::post('{project}/notes/{note}/remove-lock', [NoteController::class, 'removeLock'])->name('notes.remove-lock')->scopeBindings();
 
+        // ISSUES
+        Route::get('{project}/issues', [IssueController::class, 'index'])->name('issues');
+        Route::post('{project}/issues', [IssueController::class, 'store'])->name('issues.store');
+        Route::get('{project}/issues/{issue}/open', [IssueController::class, 'index'])->name('issues.open')->scopeBindings();
+        Route::put('{project}/issues/{issue}', [IssueController::class, 'update'])->name('issues.update')->scopeBindings();
+        Route::put('{project}/issues/{issue}/status', [IssueController::class, 'updateStatus'])->name('issues.status')->scopeBindings();
+        Route::delete('{project}/issues/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->scopeBindings();
+        Route::post('{project}/issues/{issue}/restore', [IssueController::class, 'restore'])->name('issues.restore')->scopeBindings();
+
         // ATTACHMENTS
         Route::group(['prefix' => '{project}/tasks/{task}', 'as' => 'tasks.'], function () {
             Route::post('attachments/upload', [AttachmentController::class, 'store'])->name('attachments.upload');
@@ -92,8 +104,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // My Work
     Route::group(['prefix' => 'my-work', 'as' => 'my-work.'], function () {
         Route::get('tasks', [MyWorkTaskController::class, 'index'])->name('tasks.index');
+        Route::get('issues', [MyWorkIssueController::class, 'index'])->name('issues.index');
         Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
     });
+
+    // Issues across all projects
+    Route::get('issues', [AllIssuesController::class, 'index'])->name('issues.index');
 
     // Clients
     Route::group(['prefix' => 'clients', 'as' => 'clients.'], function () {

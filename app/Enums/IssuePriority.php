@@ -4,6 +4,8 @@ namespace App\Enums;
 
 enum IssuePriority: string
 {
+    use HasLabelOptions;
+
     case URGENT = 'urgent';
     case HIGH = 'high';
     case MEDIUM = 'medium';

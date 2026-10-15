@@ -9,6 +9,14 @@ use App\Models\User;
 class IssuePolicy
 {
     /**
+     * Determine whether the user can list issues across all the projects they can access.
+     */
+    public function viewAcrossProjects(User $user): bool
+    {
+        return $user->hasPermissionTo('view issues');
+    }
+
+    /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user, Project $project): bool
