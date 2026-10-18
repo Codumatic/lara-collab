@@ -9,6 +9,7 @@ import { usePage } from "@inertiajs/react";
 import { ActionIcon, Button, Grid, Group, Text, Title, Tooltip } from "@mantine/core";
 import {
   IconBug,
+  IconChecklist,
   IconFilter,
   IconFilterCog,
   IconLayoutKanban,
@@ -75,6 +76,18 @@ export default function Header() {
                 onClick={() => redirectTo("projects.issues", project.id)}
               >
                 <IconBug style={{ width: "60%", height: "60%" }} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+
+          {can("view test cases") && (
+            <Tooltip label="Test cases" openDelay={500} withArrow>
+              <ActionIcon
+                variant="default"
+                size="lg"
+                onClick={() => redirectTo("projects.test-cases", project.id)}
+              >
+                <IconChecklist style={{ width: "60%", height: "60%" }} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
           )}

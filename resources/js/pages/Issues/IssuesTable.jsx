@@ -1,3 +1,4 @@
+import TableHead from '@/components/TableHead';
 import TableRowEmpty from '@/components/TableRowEmpty';
 import { diffForHumans } from '@/utils/datetime';
 import {
@@ -6,6 +7,7 @@ import {
   issueSeverityColors,
   issueStatusColors,
 } from '@/utils/issue';
+import { reloadWithQuery } from '@/utils/route';
 import { Table, Text, Tooltip } from '@mantine/core';
 import IssueBadge from '../Projects/Issues/IssueBadge';
 
@@ -20,7 +22,19 @@ export default function IssuesTable({
   showProject = false,
   renderActions = null,
 }) {
-  const columnCount = 8 + (showProject ? 1 : 0) + (renderActions ? 1 : 0);
+  const columns = [
+    { label: 'ID', column: 'number' },
+    showProject && { label: 'Project', sortable: false },
+    { label: 'Title', column: 'title' },
+    { label: 'Status', column: 'status' },
+    { label: 'Severity', column: 'severity' },
+    { label: 'Priority', column: 'priority' },
+    { label: 'Assignee', sortable: false },
+    { label: 'Reporter', sortable: false },
+    { label: 'Created', column: 'created_at' },
+    renderActions && { label: '', sortable: false },
+  ].filter(Boolean);
+  const columnCount = columns.length;
 
   const rows = issues.length ? (
     issues.map(issue => (
@@ -106,20 +120,10 @@ export default function IssuesTable({
         verticalSpacing='sm'
         highlightOnHover
       >
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>ID</Table.Th>
-            {showProject && <Table.Th>Project</Table.Th>}
-            <Table.Th>Title</Table.Th>
-            <Table.Th>Status</Table.Th>
-            <Table.Th>Severity</Table.Th>
-            <Table.Th>Priority</Table.Th>
-            <Table.Th>Assignee</Table.Th>
-            <Table.Th>Reporter</Table.Th>
-            <Table.Th>Created</Table.Th>
-            {renderActions && <Table.Th />}
-          </Table.Tr>
-        </Table.Thead>
+        <TableHead
+          columns={columns}
+          sort={sort => reloadWithQuery({ ...sort, page: undefined }, true)}
+        />
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
     </Table.ScrollContainer>

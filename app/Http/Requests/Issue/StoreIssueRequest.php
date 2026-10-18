@@ -41,11 +41,18 @@ class StoreIssueRequest extends FormRequest
             'assigned_to_user_id' => ['nullable', 'integer', 'exists:users,id', $this->assigneeHasProjectAccess()],
             'labels' => ['array'],
             'labels.*' => ['integer', 'exists:labels,id'],
+            'test_case_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('test_cases', 'id')->where('project_id', $this->route('project')?->id),
+            ],
+            'attachments' => ['array'],
+            'attachments.*' => ['file', 'max:20480'],
         ];
     }
 
     /**
-     * Only people who can see the project can be assigned to its issues.
+     * Issues can only be assigned to team members who can see the project, never to clients.
      */
     protected function assigneeHasProjectAccess(): Closure
     {
@@ -53,7 +60,13 @@ class StoreIssueRequest extends FormRequest
             $assignee = User::find($value);
             $project = $this->route('project');
 
-            if ($assignee && $project instanceof Project && ! $assignee->hasProjectAccess($project)) {
+            if (! $assignee || ! $project instanceof Project) {
+                return;
+            }
+
+            if ($assignee->hasRole('client')) {
+                $fail('Issues can only be assigned to team members.');
+            } elseif (! $assignee->hasProjectAccess($project)) {
                 $fail('The selected assignee does not have access to this project.');
             }
         };

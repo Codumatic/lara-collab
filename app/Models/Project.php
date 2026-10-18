@@ -70,6 +70,16 @@ class Project extends Model implements AuditableContract
         return $this->hasMany(Issue::class);
     }
 
+    public function epics(): HasMany
+    {
+        return $this->hasMany(Epic::class);
+    }
+
+    public function testCases(): HasMany
+    {
+        return $this->hasMany(TestCase::class);
+    }
+
     public function favoritedByAuthUser(): BelongsToMany
     {
         return $this->belongsToMany(

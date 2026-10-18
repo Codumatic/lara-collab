@@ -1,11 +1,12 @@
 import Pagination from '@/components/Pagination';
 import Layout from '@/layouts/MainLayout';
+import IssueFilters from '@/pages/Issues/IssueFilters';
 import IssuesTable from '@/pages/Issues/IssuesTable';
 import { router, usePage } from '@inertiajs/react';
 import { Breadcrumbs, Title } from '@mantine/core';
 
 const MyWorkIssuesIndex = () => {
-  const { items, dropdowns } = usePage().props;
+  const { items, dropdowns, filterOptions } = usePage().props;
 
   return (
     <>
@@ -24,11 +25,20 @@ const MyWorkIssuesIndex = () => {
         Issues assigned to you
       </Title>
 
+      <IssueFilters
+        dropdowns={dropdowns}
+        reporters={filterOptions.reporters}
+        labels={filterOptions.labels}
+        showAssigneeFilter={false}
+      />
+
       <IssuesTable
         issues={items.data}
         dropdowns={dropdowns}
         showProject
-        onRowClick={issue => router.get(route('projects.issues.open', [issue.project_id, issue.id]))}
+        onRowClick={issue =>
+          router.get(route('projects.issues.open', [issue.project_id, issue.id]))
+        }
       />
 
       {items.meta.last_page > 1 && (

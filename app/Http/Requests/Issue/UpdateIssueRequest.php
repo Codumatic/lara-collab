@@ -4,6 +4,7 @@ namespace App\Http\Requests\Issue;
 
 use App\Enums\IssueStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class UpdateIssueRequest extends StoreIssueRequest
@@ -16,7 +17,7 @@ class UpdateIssueRequest extends StoreIssueRequest
     public function rules(): array
     {
         return [
-            ...parent::rules(),
+            ...Arr::except(parent::rules(), ['attachments', 'attachments.*']),
             'status' => ['required', Rule::enum(IssueStatus::class)],
         ];
     }

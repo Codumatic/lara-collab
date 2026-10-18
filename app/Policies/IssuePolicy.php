@@ -33,6 +33,14 @@ class IssuePolicy
     }
 
     /**
+     * Anyone who can see an issue can discuss it.
+     */
+    public function comment(User $user, Issue $issue, Project $project): bool
+    {
+        return $this->view($user, $issue, $project);
+    }
+
+    /**
      * Determine whether the user can create models.
      */
     public function create(User $user, Project $project): bool

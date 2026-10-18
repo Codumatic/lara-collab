@@ -21,12 +21,15 @@ class AllIssuesController extends Controller
         return Inertia::render('Issues/Index', [
             'items' => IssueResource::collection(
                 Issue::visibleTo($request->user())
-                    ->with(['project:id,name', 'assignedToUser:id,name,avatar', 'reportedByUser:id,name,avatar'])
-                    ->latest()
+                    ->with(['project:id,name', 'assignedToUser:id,name,avatar', 'reportedByUser:id,name,avatar', 'labels:id,name,color'])
+                    ->search($request->input('search'))
+                    ->filterByQueryString()
+                    ->sortedBy($request->input('sort'), 'created_at')
                     ->paginate(25)
                     ->withQueryString()
             ),
             'dropdowns' => Issue::dropdownOptions(),
+            'filterOptions' => Issue::filterOptionsFor(Issue::visibleTo($request->user())),
         ]);
     }
 }

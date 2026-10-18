@@ -4,13 +4,9 @@ import Layout from '@/layouts/MainLayout';
 import { reloadWithQuery, reloadWithoutQueryParams, replaceUrlWithoutReload } from '@/utils/route';
 import { router, usePage } from '@inertiajs/react';
 import { ActionIcon, Button, Group, Text, Title, Tooltip } from '@mantine/core';
-import {
-  IconArrowLeft,
-  IconLayoutKanban,
-  IconLayoutList,
-  IconPlus,
-} from '@tabler/icons-react';
+import { IconArrowLeft, IconLayoutKanban, IconLayoutList, IconPlus } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
+import IssueFilters from '@/pages/Issues/IssueFilters';
 import IssuesTable from '@/pages/Issues/IssuesTable';
 import IssueActions from './IssueActions';
 import IssueDrawer from './IssueDrawer';
@@ -19,7 +15,16 @@ import IssuesBoard from './IssuesBoard';
 let currentProject = null;
 
 const IssuesIndex = () => {
-  const { project, items, boardIssues, openedIssue, dropdowns } = usePage().props;
+  const {
+    project,
+    items,
+    boardIssues,
+    openedIssue,
+    dropdowns,
+    assignableUsers,
+    usersWithAccessToProject,
+    labels,
+  } = usePage().props;
   currentProject = project;
 
   const isBoardView = !!boardIssues;
@@ -35,8 +40,13 @@ const IssuesIndex = () => {
   const [drawer, setDrawer] = useState({ opened: false, issue: null });
 
   useEffect(() => {
+    const reportForCase = route().params.report_for_case;
+
     if (openedIssue) {
       setDrawer({ opened: true, issue: openedIssue });
+    } else if (reportForCase) {
+      replaceUrlWithoutReload(route('projects.issues', project.id));
+      setDrawer({ opened: true, issue: null, defaultTestCaseId: Number(reportForCase) });
     }
   }, []);
 
@@ -138,6 +148,13 @@ const IssuesIndex = () => {
         </Group>
       </Group>
 
+      <IssueFilters
+        dropdowns={dropdowns}
+        assignees={assignableUsers}
+        reporters={usersWithAccessToProject}
+        labels={labels}
+      />
+
       {isBoardView ? (
         <IssuesBoard
           issues={boardIssues}
@@ -162,10 +179,13 @@ const IssuesIndex = () => {
       )}
 
       <IssueDrawer
-        key={drawer.issue?.id ?? `new-${drawer.defaultStatus ?? ''}`}
+        key={
+          drawer.issue?.id ?? `new-${drawer.defaultStatus ?? ''}-${drawer.defaultTestCaseId ?? ''}`
+        }
         opened={drawer.opened}
         issue={drawer.issue}
         defaultStatus={drawer.defaultStatus}
+        defaultTestCaseId={drawer.defaultTestCaseId}
         onClose={closeDrawer}
       />
     </>

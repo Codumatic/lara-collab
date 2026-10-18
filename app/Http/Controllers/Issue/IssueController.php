@@ -33,26 +33,44 @@ class IssueController extends Controller
             $this->authorize('view', [$issue, $project]);
         }
 
-        $relations = ['assignedToUser:id,name,avatar', 'reportedByUser:id,name,avatar', 'labels:id,name,color'];
+        $relations = [
+            'assignedToUser:id,name,avatar',
+            'reportedByUser:id,name,avatar',
+            'labels:id,name,color',
+            'attachments',
+            'testCase:id,number,title,status',
+        ];
         $isBoardView = $request->input('view') === 'board' && ! $request->has('archived');
+        $usersWithAccess = PermissionService::usersWithAccessToProject($project);
+
+        $listQuery = fn () => $project->issues()
+            ->with($relations)
+            ->search($request->input('search'))
+            ->filterByQueryString();
 
         return Inertia::render('Projects/Issues/Index', [
             'project' => $project,
             'items' => $isBoardView ? null : IssueResource::collection(
-                $project->issues()
-                    ->with($relations)
+                $listQuery()
                     ->when($request->has('archived'), fn ($query) => $query->onlyArchived())
-                    ->latest('number')
+                    ->sortedBy($request->input('sort'))
                     ->paginate(25)
                     ->withQueryString()
             ),
             'boardIssues' => $isBoardView
-                ? IssueResource::collection($project->issues()->with($relations)->latest('number')->get())
+                ? IssueResource::collection($listQuery()->sortedBy($request->input('sort'))->get())
                 : null,
             'openedIssue' => $issue ? new IssueResource($issue->load($relations)) : null,
-            'usersWithAccessToProject' => PermissionService::usersWithAccessToProject($project),
+            'usersWithAccessToProject' => $usersWithAccess,
+            'assignableUsers' => $usersWithAccess
+                ->reject(fn (array $user) => collect($user['roles'] ?? [])->contains('name', 'client'))
+                ->values(),
             'labels' => Label::orderBy('name')->get(['id', 'name', 'color']),
             'dropdowns' => Issue::dropdownOptions(),
+            'testCaseOptions' => $project->testCases()
+                ->orderBy('number')
+                ->get(['id', 'number', 'title'])
+                ->map(fn ($testCase) => ['value' => (string) $testCase->id, 'label' => "TC-{$testCase->number}: {$testCase->title}"]),
         ]);
     }
 
@@ -71,7 +89,7 @@ class IssueController extends Controller
     {
         $this->authorize('update', [$issue, $project]);
 
-        $updateIssue->update($issue, $request->validated());
+        $updateIssue->update($issue, $request->user(), $request->validated());
 
         return redirect()->back()->success('Issue saved', "Issue ISS-{$issue->number} was successfully saved.");
     }
