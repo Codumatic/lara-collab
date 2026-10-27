@@ -3,6 +3,7 @@ import useNavigationStore from "@/hooks/store/useNavigationStore";
 import { usePage } from "@inertiajs/react";
 import { Group, ScrollArea, Text, rem } from "@mantine/core";
 import {
+  IconBug,
   IconBuildingSkyscraper,
   IconFileDollar,
   IconGauge,
@@ -38,17 +39,30 @@ export default function Sidebar() {
         visible: can("view projects"),
       },
       {
+        label: "Issues",
+        icon: IconBug,
+        link: route("issues.index"),
+        active: route().current("issues.*"),
+        visible: can("view issues"),
+      },
+      {
         label: "My Work",
         icon: IconLayoutList,
         active: route().current("my-work.*"),
         opened: route().current("my-work.*"),
-        visible: can("view tasks") || can("view activities"),
+        visible: can("view tasks") || can("view issues") || can("view activities"),
         links: [
           {
             label: "Tasks",
             link: route("my-work.tasks.index"),
             active: route().current("my-work.tasks.*"),
             visible: can("view tasks"),
+          },
+          {
+            label: "Issues",
+            link: route("my-work.issues.index"),
+            active: route().current("my-work.issues.*"),
+            visible: can("view issues"),
           },
           {
             label: "Activity",

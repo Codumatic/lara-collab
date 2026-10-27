@@ -8,7 +8,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DropdownValuesController;
 use App\Http\Controllers\Invoice\InvoiceTasksController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\Issue\AllIssuesController;
+use App\Http\Controllers\Issue\IssueAttachmentController;
+use App\Http\Controllers\Issue\IssueCommentController;
+use App\Http\Controllers\Issue\IssueController;
+use App\Http\Controllers\Issue\IssueHistoryController;
 use App\Http\Controllers\MyWork\ActivityController;
+use App\Http\Controllers\MyWork\MyWorkIssueController;
 use App\Http\Controllers\MyWork\MyWorkTaskController;
 use App\Http\Controllers\Note\NoteController;
 use App\Http\Controllers\ProjectController;
@@ -22,6 +28,12 @@ use App\Http\Controllers\Task\CommentController;
 use App\Http\Controllers\Task\GroupController;
 use App\Http\Controllers\Task\TimeLogController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TestCase\EpicController;
+use App\Http\Controllers\TestCase\StoryController;
+use App\Http\Controllers\TestCase\TestCaseAttachmentController;
+use App\Http\Controllers\TestCase\TestCaseCommentController;
+use App\Http\Controllers\TestCase\TestCaseController;
+use App\Http\Controllers\TestCase\TestCaseTransferController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +80,42 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('{project}/notes/{note}/unlock', [NoteController::class, 'unlock'])->name('notes.unlock')->middleware(['throttle:10,1'])->scopeBindings();
         Route::post('{project}/notes/{note}/remove-lock', [NoteController::class, 'removeLock'])->name('notes.remove-lock')->scopeBindings();
 
+        // ISSUES
+        Route::get('{project}/issues', [IssueController::class, 'index'])->name('issues');
+        Route::post('{project}/issues', [IssueController::class, 'store'])->name('issues.store');
+        Route::get('{project}/issues/{issue}/open', [IssueController::class, 'index'])->name('issues.open')->scopeBindings();
+        Route::put('{project}/issues/{issue}', [IssueController::class, 'update'])->name('issues.update')->scopeBindings();
+        Route::put('{project}/issues/{issue}/status', [IssueController::class, 'updateStatus'])->name('issues.status')->scopeBindings();
+        Route::delete('{project}/issues/{issue}', [IssueController::class, 'destroy'])->name('issues.destroy')->scopeBindings();
+        Route::post('{project}/issues/{issue}/restore', [IssueController::class, 'restore'])->name('issues.restore')->scopeBindings();
+        Route::get('{project}/issues/{issue}/comments', [IssueCommentController::class, 'index'])->name('issues.comments');
+        Route::post('{project}/issues/{issue}/comments', [IssueCommentController::class, 'store'])->name('issues.comments.store');
+        Route::post('{project}/issues/{issue}/attachments', [IssueAttachmentController::class, 'store'])->name('issues.attachments.store');
+        Route::delete('{project}/issues/{issue}/attachments/{attachment}', [IssueAttachmentController::class, 'destroy'])->name('issues.attachments.destroy');
+        Route::get('{project}/issues/{issue}/history', [IssueHistoryController::class, 'index'])->name('issues.history');
+
+        // TEST CASES
+        Route::get('{project}/test-cases', [TestCaseController::class, 'index'])->name('test-cases');
+        Route::post('{project}/test-cases', [TestCaseController::class, 'store'])->name('test-cases.store');
+        Route::get('{project}/test-cases/export', [TestCaseTransferController::class, 'export'])->name('test-cases.export');
+        Route::get('{project}/test-cases/template', [TestCaseTransferController::class, 'template'])->name('test-cases.template');
+        Route::post('{project}/test-cases/import', [TestCaseTransferController::class, 'import'])->name('test-cases.import');
+        Route::get('{project}/test-cases/{testCase}/open', [TestCaseController::class, 'index'])->name('test-cases.open')->scopeBindings();
+        Route::put('{project}/test-cases/{testCase}', [TestCaseController::class, 'update'])->name('test-cases.update')->scopeBindings();
+        Route::delete('{project}/test-cases/{testCase}', [TestCaseController::class, 'destroy'])->name('test-cases.destroy')->scopeBindings();
+        Route::get('{project}/test-cases/{testCase}/comments', [TestCaseCommentController::class, 'index'])->name('test-cases.comments')->scopeBindings();
+        Route::post('{project}/test-cases/{testCase}/comments', [TestCaseCommentController::class, 'store'])->name('test-cases.comments.store')->scopeBindings();
+        Route::post('{project}/test-cases/{testCase}/attachments', [TestCaseAttachmentController::class, 'store'])->name('test-cases.attachments.store')->scopeBindings();
+        Route::delete('{project}/test-cases/{testCase}/attachments/{attachment}', [TestCaseAttachmentController::class, 'destroy'])->name('test-cases.attachments.destroy')->scopeBindings();
+
+        // EPICS & STORIES
+        Route::post('{project}/epics', [EpicController::class, 'store'])->name('epics.store');
+        Route::put('{project}/epics/{epic}', [EpicController::class, 'update'])->name('epics.update')->scopeBindings();
+        Route::delete('{project}/epics/{epic}', [EpicController::class, 'destroy'])->name('epics.destroy')->scopeBindings();
+        Route::post('{project}/epics/{epic}/stories', [StoryController::class, 'store'])->name('stories.store')->scopeBindings();
+        Route::put('{project}/epics/{epic}/stories/{story}', [StoryController::class, 'update'])->name('stories.update')->scopeBindings();
+        Route::delete('{project}/epics/{epic}/stories/{story}', [StoryController::class, 'destroy'])->name('stories.destroy')->scopeBindings();
+
         // ATTACHMENTS
         Route::group(['prefix' => '{project}/tasks/{task}', 'as' => 'tasks.'], function () {
             Route::post('attachments/upload', [AttachmentController::class, 'store'])->name('attachments.upload');
@@ -92,8 +140,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // My Work
     Route::group(['prefix' => 'my-work', 'as' => 'my-work.'], function () {
         Route::get('tasks', [MyWorkTaskController::class, 'index'])->name('tasks.index');
+        Route::get('issues', [MyWorkIssueController::class, 'index'])->name('issues.index');
         Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
     });
+
+    // Issues across all projects
+    Route::get('issues', [AllIssuesController::class, 'index'])->name('issues.index');
 
     // Clients
     Route::group(['prefix' => 'clients', 'as' => 'clients.'], function () {

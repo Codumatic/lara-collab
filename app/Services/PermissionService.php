@@ -25,6 +25,8 @@ class PermissionService
                 'view tasks', 'create task', 'edit task', 'archive task', 'restore task', 'reorder task', 'complete task', 'add time log', 'delete time log',
                 'view time logs', 'view comments',
             ],
+            'Issues' => ['view issues', 'create issue', 'edit issue', 'archive issue', 'restore issue'],
+            'Test Cases' => ['view test cases', 'create test case', 'edit test case', 'delete test case'],
             'Invoices' => ['view invoices', 'create invoice', 'edit invoice', 'archive invoice', 'restore invoice', 'change invoice status', 'download invoice', 'print invoice'],
             'Reports' => ['view logged time sum report', 'view daily logged time report', 'view fixed price sum report'],
             'Activities' => ['view activities'],
@@ -38,6 +40,8 @@ class PermissionService
                 'view tasks', 'create task', 'edit task', 'archive task', 'restore task', 'reorder task', 'complete task', 'add time log', 'delete time log',
                 'view time logs', 'view comments',
             ],
+            'Issues' => ['view issues', 'create issue', 'edit issue', 'archive issue', 'restore issue'],
+            'Test Cases' => ['view test cases', 'create test case', 'edit test case', 'delete test case'],
             'Reports' => ['view logged time sum report', 'view daily logged time report', 'view fixed price sum report'],
         ],
         'developer' => [
@@ -47,6 +51,8 @@ class PermissionService
                 'view tasks', 'create task', 'edit task', 'restore task', 'reorder task', 'complete task', 'add time log', 'delete time log',
                 'view time logs', 'view comments',
             ],
+            'Issues' => ['view issues', 'create issue', 'edit issue'],
+            'Test Cases' => ['view test cases'],
         ],
         'qa engineer' => [
             'Project' => ['view projects', 'view project'],
@@ -54,6 +60,8 @@ class PermissionService
             'Tasks' => [
                 'view tasks', 'create task', 'edit task', 'add time log', 'delete time log', 'view time logs', 'view comments',
             ],
+            'Issues' => ['view issues', 'create issue', 'edit issue', 'archive issue'],
+            'Test Cases' => ['view test cases', 'create test case', 'edit test case', 'delete test case'],
         ],
         'designer' => [
             'Project' => ['view projects', 'view project'],
@@ -62,6 +70,8 @@ class PermissionService
                 'view tasks', 'create task', 'edit task', 'restore task', 'reorder task', 'complete task', 'add time log', 'delete time log',
                 'view time logs', 'view comments',
             ],
+            'Issues' => ['view issues', 'create issue', 'edit issue'],
+            'Test Cases' => ['view test cases'],
         ],
         'client' => [
             'Project' => ['view projects', 'view project'],
@@ -69,6 +79,7 @@ class PermissionService
             'Tasks' => [
                 'view tasks', 'create task', 'view time logs', 'view comments',
             ],
+            'Issues' => ['view issues', 'create issue'],
         ],
     ];
 

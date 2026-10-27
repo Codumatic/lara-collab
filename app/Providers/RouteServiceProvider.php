@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\ClientCompany;
+use App\Models\Issue;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskGroup;
@@ -45,6 +46,15 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('task', Task::class, function ($value) {
             return Task::where('id', $value)
                 ->when(auth()->user()->isAdmin(), fn ($query) => $query->withArchived())
+                ->firstOrFail();
+        });
+
+        Route::model('issue', Issue::class, function ($value) {
+            return Issue::where('id', $value)
+                ->when(
+                    auth()->user()->isAdmin() || auth()->user()->hasPermissionTo('restore issue'),
+                    fn ($query) => $query->withArchived()
+                )
                 ->firstOrFail();
         });
 
