@@ -55,9 +55,19 @@ class TestCaseTransferController extends Controller
             'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
         ]);
 
-        $rows = Excel::toCollection(new TestCasesImport, $request->file('file'))->first() ?? collect();
+        $sheets = Excel::toCollection(new TestCasesImport, $request->file('file'));
+        $result = ['created' => 0, 'updated' => 0, 'errors' => []];
 
-        $result = $importTestCases->import($project, $request->user(), $rows);
+        foreach ($sheets->values() as $index => $rows) {
+            $sheetResult = $importTestCases->import($project, $request->user(), $rows);
+
+            $result['created'] += $sheetResult['created'];
+            $result['updated'] += $sheetResult['updated'];
+            $result['errors'] = [
+                ...$result['errors'],
+                ...array_map(fn (string $error) => $sheets->count() > 1 ? 'Sheet '.($index + 1).", {$error}" : $error, $sheetResult['errors']),
+            ];
+        }
 
         $summary = "Added {$result['created']}, updated {$result['updated']}.";
 

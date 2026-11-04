@@ -7,8 +7,8 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 /**
- * Reads the sheet into rows keyed by the slugged headings (id, epic, story, title, ..., expected_results).
- * The rows are processed by ImportTestCases.
+ * Reads every sheet into rows keyed by the slugged headings (id, epic, story, title, ..., expected_results).
+ * The rows of each sheet are processed by ImportTestCases.
  */
 class TestCasesImport implements ToCollection, WithHeadingRow
 {
