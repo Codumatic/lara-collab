@@ -12,6 +12,7 @@ import {
 } from '@/utils/route';
 import { testCaseCode, testCaseStatusColors } from '@/utils/testCase';
 import { router, usePage } from '@inertiajs/react';
+import { showNotification } from '@mantine/notifications';
 import {
   ActionIcon,
   Badge,
@@ -48,6 +49,7 @@ const TestCasesIndex = () => {
 
   const [drawer, setDrawer] = useState({ opened: false, testCase: null });
   const [importing, setImporting] = useState(false);
+  const [importMenuOpened, setImportMenuOpened] = useState(false);
   const params = currentUrlParams();
 
   useEffect(() => {
@@ -90,11 +92,23 @@ const TestCasesIndex = () => {
       return;
     }
 
+    setImportMenuOpened(false);
     setImporting(true);
     router.post(
       route('projects.test-cases.import', project.id),
       { file },
-      { forceFormData: true, preserveScroll: true, onFinish: () => setImporting(false) }
+      {
+        forceFormData: true,
+        preserveScroll: true,
+        onError: errors =>
+          showNotification({
+            title: 'Import failed',
+            message: Object.values(errors).join(' '),
+            color: 'red',
+            autoClose: 10000,
+          }),
+        onFinish: () => setImporting(false),
+      }
     );
   };
 
@@ -280,6 +294,8 @@ const TestCasesIndex = () => {
           </Button>
           {can('create test case') && (
             <Menu
+              opened={importMenuOpened}
+              onChange={setImportMenuOpened}
               withinPortal
               position='bottom-end'
               shadow='md'
@@ -302,6 +318,7 @@ const TestCasesIndex = () => {
                   {props => (
                     <Menu.Item
                       {...props}
+                      closeMenuOnClick={false}
                       leftSection={<IconUpload size={14} />}
                     >
                       Upload Excel file
